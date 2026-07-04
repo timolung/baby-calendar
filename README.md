@@ -35,12 +35,12 @@ When `GOOGLE_SHEET_URL` is empty, the app uses the sample events in `js/sampleEv
 - a published Google Sheet CSV URL
 - any direct CSV URL
 
-The Google Sheet CSV is expected to have these columns:
+The events CSV is expected to have these columns:
 
 ```csv
-title,start,end,category,notes,category_label,category_color
-Baby born,2026-09-11,2026-09-12,baby,,Baby milestone,#C9694F
-Family visit,2026-09-14,2026-10-11,family,,Family visit,#6E8F73
+title,start,end,category,notes
+Baby born,2026-09-11,2026-09-12,baby,
+Family visit,2026-09-14,2026-10-11,family,
 ```
 
 Dates should use `YYYY-MM-DD`. Supported categories are defined in `js/categories.js`:
@@ -53,7 +53,9 @@ Dates should use `YYYY-MM-DD`. Supported categories are defined in `js/categorie
 
 Unknown categories are shown as `tbd`.
 
-Category labels and colors can be loaded from the event CSV columns `category_label` and `category_color`. They can also be loaded from a separate Google Sheet CSV if that tab is publicly published. A separate categories sheet should have these columns:
+Category labels and colors are loaded from a separate Categories CSV. The event `category` value must match a category `key` to use that label and color.
+
+The Categories sheet should have these columns:
 
 ```csv
 key,label,color
@@ -61,14 +63,12 @@ baby,Baby milestone,#C9694F
 family,Family visit,#6E8F73
 ```
 
-The event `category` value must match a category key to use that label and color.
-
 For Google Sheets:
 
-1. Create a sheet with the columns above in the first row.
-2. Add one event per row.
-3. Make the sheet public enough for the browser to fetch it.
-4. Paste the Sheet URL into `GOOGLE_SHEET_URL` in `js/config.js`.
+1. Create an Events tab with `title,start,end,category,notes`.
+2. Create a Categories tab with `key,label,color`.
+3. Make both published CSV URLs public enough for the browser to fetch.
+4. Paste the Events URL into `GOOGLE_SHEET_URL` and the Categories URL into `GOOGLE_SHEET_CATEGORIES_URL` in `js/config.js`.
 
 The current event sheet is:
 
@@ -82,7 +82,7 @@ The current categories tab is:
 https://docs.google.com/spreadsheets/d/1bcqLr9Ee2oXQY5Id28onFIn48Zo8H4Zta7dKjRL3WUM/edit#gid=470538468
 ```
 
-For GitHub Pages, the configured CSV URL must be anonymously readable. The current setup uses the public `Events` CSV with `category_label` and `category_color` columns, so the page does not require the separate `Categories` tab to be public.
+For GitHub Pages, both configured CSV URLs must be anonymously readable.
 
 ## Project Structure
 

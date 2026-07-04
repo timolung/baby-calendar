@@ -46,15 +46,13 @@ function getVisibleCategoryKeys(visibleEvents){
 }
 
 async function loadCategories(){
-  const categorySources = [GOOGLE_SHEET_CATEGORIES_URL, GOOGLE_SHEET_URL].filter(Boolean);
-  for(const source of categorySources){
-    try{
-      const categories = await loadSheetCategories(source);
-      setCategories(categories);
-      return true;
-    } catch(e){
-      console.warn("Could not load Google Sheet categories from source; trying fallback", e);
-    }
+  if(!GOOGLE_SHEET_CATEGORIES_URL) return false;
+  try{
+    const categories = await loadSheetCategories(GOOGLE_SHEET_CATEGORIES_URL);
+    setCategories(categories);
+    return true;
+  } catch(e){
+    console.warn("Could not load Google Sheet categories", e);
   }
   return false;
 }
