@@ -1,7 +1,8 @@
-import { GOOGLE_SHEET_CSV_URL, DEFAULT_MONTH, DEFAULT_MONTH_COUNT } from "./config.js";
+import { GOOGLE_SHEET_URL, DEFAULT_MONTH, DEFAULT_MONTH_COUNT } from "./config.js";
 import { getSampleEvents } from "./sampleEvents.js";
 import { loadSheetEvents } from "./sheets.js";
 import { renderLegend, renderMonths, renderEventList } from "./render.js";
+import { byId } from "./dom.js";
 
 const today = new Date();
 let events = [];
@@ -10,7 +11,7 @@ let anchorMonth = DEFAULT_MONTH;
 let monthsToShow = DEFAULT_MONTH_COUNT;
 
 function setStatus(msg){
-  const el = document.getElementById("saveStatus");
+  const el = byId("saveStatus");
   if(el) el.textContent = msg;
 }
 
@@ -22,9 +23,9 @@ function render(){
 
 async function loadEvents(){
   setStatus("Loading events…");
-  if(GOOGLE_SHEET_CSV_URL){
+  if(GOOGLE_SHEET_URL){
     try{
-      events = await loadSheetEvents(GOOGLE_SHEET_CSV_URL);
+      events = await loadSheetEvents(GOOGLE_SHEET_URL);
       setStatus(`Loaded ${events.length} events from Google Sheets`);
     } catch(e){
       console.error(e);
@@ -33,27 +34,32 @@ async function loadEvents(){
     }
   } else {
     events = getSampleEvents(today);
-    setStatus("Showing sample events. Add the Google Sheet CSV URL in js/config.js later.");
+    setStatus("Showing sample events. Add a Google Sheet URL in js/config.js.");
   }
   render();
 }
 
 function bindControls(){
-  document.getElementById("prevBtn").addEventListener("click", () => {
+  byId("prevBtn").addEventListener("click", () => {
     anchorMonth -= 1;
     if(anchorMonth < 0){ anchorMonth = 11; anchorYear -= 1; }
     renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
   });
-  document.getElementById("nextBtn").addEventListener("click", () => {
+  byId("todayBtn").addEventListener("click", () => {
+    anchorYear = today.getFullYear();
+    anchorMonth = today.getMonth();
+    renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
+  });
+  byId("nextBtn").addEventListener("click", () => {
     anchorMonth += 1;
     if(anchorMonth > 11){ anchorMonth = 0; anchorYear += 1; }
     renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
   });
-  document.getElementById("stepUp").addEventListener("click", () => {
+  byId("stepUp").addEventListener("click", () => {
     monthsToShow = Math.min(12, monthsToShow + 1);
     renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
   });
-  document.getElementById("stepDown").addEventListener("click", () => {
+  byId("stepDown").addEventListener("click", () => {
     monthsToShow = Math.max(1, monthsToShow - 1);
     renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
   });

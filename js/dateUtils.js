@@ -11,13 +11,16 @@ export function toISO(y,m,d){
 
 export function getWeeks(year, monthIndex0){
   const first = new Date(year, monthIndex0, 1);
+  const last = new Date(year, monthIndex0 + 1, 0);
   const startDow = first.getDay();
   const gridStart = new Date(year, monthIndex0, 1 - startDow);
+  const endDow = last.getDay();
+  const gridEnd = new Date(year, monthIndex0, last.getDate() + (6 - endDow));
   const weeks = [];
-  for(let w=0; w<6; w++){
+  for(let weekStart = new Date(gridStart); weekStart <= gridEnd; weekStart.setDate(weekStart.getDate() + 7)){
     const week = [];
     for(let d=0; d<7; d++){
-      const dt = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + w*7 + d);
+      const dt = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + d);
       week.push({
         iso: toISO(dt.getFullYear(), dt.getMonth(), dt.getDate()),
         day: dt.getDate(),

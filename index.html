@@ -10,21 +10,22 @@
 <div class="app">
   <header>
     <div>
-      <div class="eyebrow">Family Log - Timo</div>
+      <div class="eyebrow">FAMILY LOG · <span class="walnut-icon" aria-label="Walnut" role="img"></span></div>
       <h1>Baby Schedule</h1>
-      <p>Baby days, visits, and Shay's schedule, all on one board.</p>
+      <p>Walnut's monthly family calendar</p>
     </div>
     <div class="controls">
       <div class="seg">
-        <button id="prevBtn">Prev</button>
-        <span id="currentMonthLabel"></span>
-        <button id="nextBtn">Next</button>
+        <button id="prevBtn" type="button" aria-label="Previous month">&larr;</button>
+        <span id="currentMonthLabel" aria-live="polite"></span>
+        <button id="nextBtn" type="button" aria-label="Next month">&rarr;</button>
       </div>
+      <button class="control-btn" id="todayBtn" type="button" aria-label="Go to current month">Today</button>
       <div class="stepper">
         <label>Months</label>
-        <button id="stepDown">-</button>
+        <button id="stepDown" type="button" aria-label="Show fewer months">-</button>
         <input id="monthsInput" type="text" value="12" readonly>
-        <button id="stepUp">+</button>
+        <button id="stepUp" type="button" aria-label="Show more months">+</button>
       </div>
     </div>
   </header>

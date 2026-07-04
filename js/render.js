@@ -1,11 +1,7 @@
 import { CATEGORIES, getCategory } from "./categories.js";
 import { DOW, MONTH_NAMES, getWeeks, formatRange } from "./dateUtils.js";
-
-function escapeHtml(s){
-  const d=document.createElement("div");
-  d.textContent=s;
-  return d.innerHTML;
-}
+import { escapeHtml } from "./dom.js";
+import { openEventDetails } from "./modal.js";
 
 function assignLanes(events, monthStartISO, monthEndISO){
   const relevant = events
@@ -47,7 +43,7 @@ export function renderMonths({events, anchorYear, anchorMonth, monthsToShow}){
 function buildMonthCard(year, monthIndex0, events){
   const weeks = getWeeks(year, monthIndex0);
   const monthStartISO = weeks[0][0].iso;
-  const monthEndISO = weeks[5][6].iso;
+  const monthEndISO = weeks[weeks.length - 1][6].iso;
   const laneOf = assignLanes(events, monthStartISO, monthEndISO);
 
   const card=document.createElement("div");
@@ -104,7 +100,7 @@ function buildMonthCard(year, monthIndex0, events){
       bar.style.background=getCategory(e.category).color;
       bar.textContent=isTrueStart ? e.title : "";
       bar.title=`${e.title} (${formatRange(e.start,e.end)})`;
-      bar.addEventListener("click", ev => { ev.stopPropagation(); openEventDetails(e, events); });
+      bar.addEventListener("click", ev => { ev.stopPropagation(); openEventDetails(e); });
       barsLayer.appendChild(bar);
     });
 
@@ -124,17 +120,7 @@ export function renderEventList(events){
     const row=document.createElement("div");
     row.className="event-row";
     row.innerHTML=`<span class="bar-color" style="background:${cat.color}"></span><span class="meta"><div class="t">${escapeHtml(e.title)}</div><div class="d">${formatRange(e.start,e.end)}</div></span>`;
-    row.addEventListener("click",()=>openEventDetails(e, events));
+    row.addEventListener("click",()=>openEventDetails(e));
     el.appendChild(row);
   });
-}
-
-function openEventDetails(e){
-  const cat=getCategory(e.category);
-  const backdrop=document.createElement("div");
-  backdrop.className="modal-backdrop";
-  backdrop.innerHTML=`<div class="modal"><h3>${escapeHtml(e.title)}</h3><div class="event-row" style="cursor:default;padding:0 0 12px"><span class="bar-color" style="background:${cat.color};min-height:44px"></span><span class="meta"><div class="d">${formatRange(e.start,e.end)}</div><div class="d">${escapeHtml(cat.label)}</div></span></div>${e.notes?`<div class="notes">${escapeHtml(e.notes)}</div>`:""}<div class="modal-actions"><span class="form-hint">Edit events in Google Sheets once connected.</span><button class="btn-primary" id="modalClose">Close</button></div></div>`;
-  document.body.appendChild(backdrop);
-  backdrop.addEventListener("click", ev => { if(ev.target===backdrop) backdrop.remove(); });
-  backdrop.querySelector("#modalClose").addEventListener("click",()=>backdrop.remove());
 }
