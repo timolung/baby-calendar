@@ -1,8 +1,4 @@
 export const DEFAULT_CATEGORIES = {
-  baby: { label: "Baby milestone", color: "#C9694F" },
-  family: { label: "Family visit", color: "#6E8F73" },
-  shay: { label: "Shay's schedule", color: "#4E7391" },
-  vacation: { label: "Vacation / time off", color: "#C79A34" },
   tbd: { label: "Undecided / TBD", color: "#8B7D95" }
 };
 

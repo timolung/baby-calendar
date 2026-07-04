@@ -4,9 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Baby Care Schedule - Family Calendar</title>
-  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+<script>
+  window.__APP_VERSION = String(Date.now());
+  const stylesheet = document.createElement('link');
+  stylesheet.rel = 'stylesheet';
+  stylesheet.href = `css/styles.css?v=${window.__APP_VERSION}`;
+  document.head.appendChild(stylesheet);
+</script>
 <div class="app">
   <header>
     <div>
@@ -39,6 +45,8 @@
     </div>
   </div>
 </div>
-<script type="module" src="js/main.js"></script>
+<script type="module">
+  import(`./js/main.js?v=${window.__APP_VERSION}`);
+</script>
 </body>
 </html>

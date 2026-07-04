@@ -111,7 +111,7 @@ export function rowsToEvents(rows){
 export function rowsToCategories(rows){
   if(!rows.length) return {};
   const headers=rows[0].map(h => h.trim().toLowerCase());
-  const keyIdx=getHeaderIndex(headers, ["key", "category", "id"]);
+  const keyIdx=getHeaderIndex(headers, ["key", "id"]);
   const labelIdx=getHeaderIndex(headers, ["label", "name", "category label", "category_label"]);
   const colorIdx=getHeaderIndex(headers, ["color", "hex", "colour", "category color", "category_color"]);
 
@@ -121,7 +121,7 @@ export function rowsToCategories(rows){
 
   return rows.slice(1).reduce((categories, row) => {
     const key = normalizeCategory(row[keyIdx]);
-    const label = (labelIdx >= 0 ? row[labelIdx] : key) || key;
+    const label = key;
     const color = String(row[colorIdx] || "").trim();
     if(!key || !HEX_COLOR_RE.test(color)) return categories;
     categories[key] = { label: label.trim(), color };
@@ -131,14 +131,20 @@ export function rowsToCategories(rows){
 
 export async function loadSheetEvents(sourceUrl){
   const csvUrl = resolveGoogleSheetCsvUrl(sourceUrl);
-  const response = await fetch(withCacheBuster(csvUrl), { cache:"no-store" });
+  const response = await fetch(withCacheBuster(csvUrl), {
+    cache: "reload",
+    headers: { "Cache-Control": "no-cache" }
+  });
   if(!response.ok) throw new Error(`CSV fetch failed: ${response.status}`);
   return rowsToEvents(parseCsv(await response.text()));
 }
 
 export async function loadSheetCategories(sourceUrl){
   const csvUrl = resolveGoogleSheetCsvUrl(sourceUrl);
-  const response = await fetch(withCacheBuster(csvUrl), { cache:"no-store" });
+  const response = await fetch(withCacheBuster(csvUrl), {
+    cache: "reload",
+    headers: { "Cache-Control": "no-cache" }
+  });
   if(!response.ok) throw new Error(`Category CSV fetch failed: ${response.status}`);
   return rowsToCategories(parseCsv(await response.text()));
 }
