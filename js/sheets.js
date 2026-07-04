@@ -132,8 +132,7 @@ export function rowsToCategories(rows){
 export async function loadSheetEvents(sourceUrl){
   const csvUrl = resolveGoogleSheetCsvUrl(sourceUrl);
   const response = await fetch(withCacheBuster(csvUrl), {
-    cache: "reload",
-    headers: { "Cache-Control": "no-cache" }
+    cache: "no-store"
   });
   if(!response.ok) throw new Error(`CSV fetch failed: ${response.status}`);
   return rowsToEvents(parseCsv(await response.text()));
@@ -142,8 +141,7 @@ export async function loadSheetEvents(sourceUrl){
 export async function loadSheetCategories(sourceUrl){
   const csvUrl = resolveGoogleSheetCsvUrl(sourceUrl);
   const response = await fetch(withCacheBuster(csvUrl), {
-    cache: "reload",
-    headers: { "Cache-Control": "no-cache" }
+    cache: "no-store"
   });
   if(!response.ok) throw new Error(`Category CSV fetch failed: ${response.status}`);
   return rowsToCategories(parseCsv(await response.text()));
