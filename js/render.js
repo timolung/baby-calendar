@@ -21,10 +21,16 @@ function assignLanes(events, monthStartISO, monthEndISO){
   return laneOf;
 }
 
-export function renderLegend(){
-  document.getElementById("legend").innerHTML = Object.entries(CATEGORIES).map(([key,c]) =>
-    `<span class="item"><span class="dot" style="background:${c.color}"></span>${c.label}</span>`
-  ).join("");
+export function renderLegend(categoryKeys = Object.keys(CATEGORIES)){
+  const seen = new Set();
+  const items = categoryKeys.flatMap(key => {
+    const c = getCategory(key);
+    const signature = `${c.label}|${c.color}`.toLowerCase();
+    if(seen.has(signature)) return [];
+    seen.add(signature);
+    return [`<span class="item"><span class="dot" style="background:${c.color}"></span>${escapeHtml(c.label)}</span>`];
+  });
+  document.getElementById("legend").innerHTML = items.join("");
 }
 
 export function renderMonths({events, anchorYear, anchorMonth, monthsToShow}){

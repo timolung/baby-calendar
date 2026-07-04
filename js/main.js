@@ -1,6 +1,8 @@
-import { GOOGLE_SHEET_URL, DEFAULT_MONTH, DEFAULT_MONTH_COUNT } from "./config.js";
+import { GOOGLE_SHEET_URL, GOOGLE_SHEET_CATEGORIES_URL, DEFAULT_MONTH, DEFAULT_MONTH_COUNT } from "./config.js";
 import { getSampleEvents } from "./sampleEvents.js";
-import { loadSheetEvents } from "./sheets.js";
+import { normalizeCategory, setCategories } from "./categories.js";
+import { toISO } from "./dateUtils.js";
+import { loadSheetCategories, loadSheetEvents } from "./sheets.js";
 import { renderLegend, renderMonths, renderEventList } from "./render.js";
 import { byId } from "./dom.js";
 
@@ -16,15 +18,52 @@ function setStatus(msg){
 }
 
 function render(){
-  renderLegend();
+  const visibleEvents = getVisibleEvents();
+  const visibleCategoryKeys = getVisibleCategoryKeys(visibleEvents);
+  renderLegend(visibleCategoryKeys);
   renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
-  renderEventList(events);
+  renderEventList(visibleEvents);
+}
+
+function getVisibleRange(){
+  let endYear = anchorYear, endMonth = anchorMonth + monthsToShow - 1;
+  endYear += Math.floor(endMonth / 12);
+  endMonth = ((endMonth % 12) + 12) % 12;
+  const endDate = new Date(endYear, endMonth + 1, 0);
+  return {
+    start: toISO(anchorYear, anchorMonth, 1),
+    end: toISO(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())
+  };
+}
+
+function getVisibleEvents(){
+  const range = getVisibleRange();
+  return events.filter(event => event.end >= range.start && event.start <= range.end);
+}
+
+function getVisibleCategoryKeys(visibleEvents){
+  return [...new Set(visibleEvents.map(event => normalizeCategory(event.category)))];
+}
+
+async function loadCategories(){
+  const categorySources = [GOOGLE_SHEET_CATEGORIES_URL, GOOGLE_SHEET_URL].filter(Boolean);
+  for(const source of categorySources){
+    try{
+      const categories = await loadSheetCategories(source);
+      setCategories(categories);
+      return true;
+    } catch(e){
+      console.warn("Could not load Google Sheet categories from source; trying fallback", e);
+    }
+  }
+  return false;
 }
 
 async function loadEvents(){
   setStatus("Loading events…");
   if(GOOGLE_SHEET_URL){
     try{
+      await loadCategories();
       events = await loadSheetEvents(GOOGLE_SHEET_URL);
       setStatus(`Loaded ${events.length} events from Google Sheets`);
     } catch(e){
@@ -43,25 +82,25 @@ function bindControls(){
   byId("prevBtn").addEventListener("click", () => {
     anchorMonth -= 1;
     if(anchorMonth < 0){ anchorMonth = 11; anchorYear -= 1; }
-    renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
+    render();
   });
   byId("todayBtn").addEventListener("click", () => {
     anchorYear = today.getFullYear();
     anchorMonth = today.getMonth();
-    renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
+    render();
   });
   byId("nextBtn").addEventListener("click", () => {
     anchorMonth += 1;
     if(anchorMonth > 11){ anchorMonth = 0; anchorYear += 1; }
-    renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
+    render();
   });
   byId("stepUp").addEventListener("click", () => {
     monthsToShow = Math.min(12, monthsToShow + 1);
-    renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
+    render();
   });
   byId("stepDown").addEventListener("click", () => {
     monthsToShow = Math.max(1, monthsToShow - 1);
-    renderMonths({ events, anchorYear, anchorMonth, monthsToShow });
+    render();
   });
 }
 

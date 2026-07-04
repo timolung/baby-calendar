@@ -1,4 +1,4 @@
-export const CATEGORIES = {
+export const DEFAULT_CATEGORIES = {
   baby: { label: "Baby milestone", color: "#C9694F" },
   family: { label: "Family visit", color: "#6E8F73" },
   shay: { label: "Shay's schedule", color: "#4E7391" },
@@ -6,11 +6,17 @@ export const CATEGORIES = {
   tbd: { label: "Undecided / TBD", color: "#8B7D95" }
 };
 
+export let CATEGORIES = { ...DEFAULT_CATEGORIES };
+
+export function setCategories(categories) {
+  CATEGORIES = { ...DEFAULT_CATEGORIES, ...categories };
+}
+
 export function getCategory(key) {
   return CATEGORIES[key] || CATEGORIES.tbd;
 }
 
 export function normalizeCategory(raw) {
   const key = String(raw || "tbd").trim().toLowerCase();
-  return CATEGORIES[key] ? key : "tbd";
+  return key || "tbd";
 }

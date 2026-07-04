@@ -1,6 +1,7 @@
 import { normalizeCategory } from "./categories.js";
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
 function isValidISODate(value) {
   if (!ISO_DATE_RE.test(value)) return false;
@@ -107,9 +108,37 @@ export function rowsToEvents(rows){
   }).filter(Boolean);
 }
 
+export function rowsToCategories(rows){
+  if(!rows.length) return {};
+  const headers=rows[0].map(h => h.trim().toLowerCase());
+  const keyIdx=getHeaderIndex(headers, ["key", "category", "id"]);
+  const labelIdx=getHeaderIndex(headers, ["label", "name", "category label", "category_label"]);
+  const colorIdx=getHeaderIndex(headers, ["color", "hex", "colour", "category color", "category_color"]);
+
+  if(keyIdx < 0 || colorIdx < 0){
+    throw new Error("CSV must include key and color columns");
+  }
+
+  return rows.slice(1).reduce((categories, row) => {
+    const key = normalizeCategory(row[keyIdx]);
+    const label = (labelIdx >= 0 ? row[labelIdx] : key) || key;
+    const color = String(row[colorIdx] || "").trim();
+    if(!key || !HEX_COLOR_RE.test(color)) return categories;
+    categories[key] = { label: label.trim(), color };
+    return categories;
+  }, {});
+}
+
 export async function loadSheetEvents(sourceUrl){
   const csvUrl = resolveGoogleSheetCsvUrl(sourceUrl);
   const response = await fetch(withCacheBuster(csvUrl), { cache:"no-store" });
   if(!response.ok) throw new Error(`CSV fetch failed: ${response.status}`);
   return rowsToEvents(parseCsv(await response.text()));
+}
+
+export async function loadSheetCategories(sourceUrl){
+  const csvUrl = resolveGoogleSheetCsvUrl(sourceUrl);
+  const response = await fetch(withCacheBuster(csvUrl), { cache:"no-store" });
+  if(!response.ok) throw new Error(`Category CSV fetch failed: ${response.status}`);
+  return rowsToCategories(parseCsv(await response.text()));
 }
