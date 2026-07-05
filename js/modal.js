@@ -18,7 +18,6 @@ export function openEventDetails(selectedEvent) {
       </div>
       ${selectedEvent.notes ? `<div class="notes">${escapeHtml(selectedEvent.notes)}</div>` : ""}
       <div class="modal-actions">
-        <span class="form-hint">Edit events in Google Sheets once connected.</span>
         <button class="btn-primary" id="modalClose" type="button">Close</button>
       </div>
     </div>
